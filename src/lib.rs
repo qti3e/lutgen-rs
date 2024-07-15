@@ -1,3 +1,5 @@
+#![feature(portable_simd)]
+
 //! # Lutgen (Library)
 //!
 //! > For documentation on the cli application, see the [repository](https://github.com/ozwaldorf/lutgen-rs#usage).
@@ -101,6 +103,7 @@ use interpolation::InterpolatedRemapper;
 
 pub mod identity;
 pub mod interpolation;
+mod play;
 
 /// Core image type (Rgb8)
 pub type Image = ImageBuffer<Rgb<u8>, Vec<u8>>;

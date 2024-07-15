@@ -5,7 +5,9 @@ use image::{Pixel, Rgb};
 use rand::{rngs::StdRng, SeedableRng};
 use rand_distr::{Distribution, Normal};
 
-use super::{nearest_neighbor::NearestNeighborRemapper, InterpolatedRemapper};
+use super::{
+    nearest_neighbor::NearestNeighborRemapper, InterpolatedRemapper, NearestNeighborRemapper2,
+};
 use crate::GenerateLut;
 
 /// Interpolated remapper using a gaussian distribution set to sample and mix colors.
@@ -18,7 +20,7 @@ pub struct GaussianSamplingRemapper<'a> {
     iterations: usize,
     seed: u64,
     normal: Normal<f64>,
-    nearest_neighbor: NearestNeighborRemapper<'a>,
+    nearest_neighbor: NearestNeighborRemapper2<'a>,
 }
 
 impl<'a> GaussianSamplingRemapper<'a> {
@@ -32,7 +34,7 @@ impl<'a> GaussianSamplingRemapper<'a> {
         seed: u64,
     ) -> Self {
         let normal = Normal::new(mean, std_dev).unwrap();
-        let nearest_neighbor = NearestNeighborRemapper::new(palette, lum_factor);
+        let nearest_neighbor = NearestNeighborRemapper2::new(palette, lum_factor);
 
         Self {
             iterations,

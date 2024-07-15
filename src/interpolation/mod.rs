@@ -4,6 +4,7 @@ pub use gaussian_sample::GaussianSamplingRemapper;
 use image::Rgb;
 use kiddo::float::kdtree::KdTree;
 pub use nearest_neighbor::NearestNeighborRemapper;
+pub use nearest_neighbor2::NearestNeighborRemapper2;
 use rayon::prelude::*;
 pub use rbf::{GaussianRemapper, LinearRemapper, ShepardRemapper};
 
@@ -11,6 +12,7 @@ use crate::Image;
 
 mod gaussian_sample;
 mod nearest_neighbor;
+mod nearest_neighbor2;
 mod rbf;
 
 /// Interpolated Remapper. Implements an algorithm with some initialization parameters.

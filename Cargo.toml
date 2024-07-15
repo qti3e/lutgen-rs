@@ -2,7 +2,13 @@
 name = "lutgen"
 version = "0.11.0"
 documentation = "https://docs.rs/lutgen"
-keywords = ["image-processing", "color", "hald-clut", "lookup-tables", "gaussian"]
+keywords = [
+    "image-processing",
+    "color",
+    "hald-clut",
+    "lookup-tables",
+    "gaussian",
+]
 description = "A blazingly fast interpolated LUT generator and applicator for arbitrary and popular color palettes."
 edition = "2021"
 license = "MIT"
@@ -25,6 +31,8 @@ rand_distr = "0.4"
 rayon = "1.10"
 kiddo = "4.2"
 oklab = "1.0"
+rand_xoshiro = "0.6"
+arrayvec = "0.7"
 
 # General bin deps
 lutgen-palettes = { version = "0.4", path = "palettes", optional = true }
@@ -43,19 +51,19 @@ criterion = { version = "0.5", features = ["html_reports"] }
 [features]
 default = ["bin"]
 bin = [
-  "lutgen-palettes",
-  "clap",
-  "clap_complete",
-  "spinners",
-  "dirs",
-  "regex",
-  "imara-diff"
+    "lutgen-palettes",
+    "clap",
+    "clap_complete",
+    "spinners",
+    "dirs",
+    "regex",
+    "imara-diff",
 ]
 
 [[bin]]
 name = "lutgen"
 path = "src/bin.rs"
-required-features=["bin"]
+required-features = ["bin"]
 
 [[bench]]
 name = "main"
@@ -71,12 +79,12 @@ inherits = "release"
 
 [package.metadata.aur]
 custom = [
-  "# Generate and install shell completions",
-  "mkdir completions",
-  "./lutgen completions bash > completions/$_pkgname",
-  "./lutgen completions zsh > completions/_$_pkgname",
-  "./lutgen completions fish > completions/$_pkgname.fish",
-  "install -Dm644 completions/$_pkgname -t \"$pkgdir/usr/share/bash-completion/completions\"",
-  "install -Dm644 completions/_$_pkgname -t \"$pkgdir/usr/share/zsh/site-functions\"",
-  "install -Dm644 completions/$_pkgname.fish -t \"$pkgdir/usr/share/fish/vendor_completions.d\""
+    "# Generate and install shell completions",
+    "mkdir completions",
+    "./lutgen completions bash > completions/$_pkgname",
+    "./lutgen completions zsh > completions/_$_pkgname",
+    "./lutgen completions fish > completions/$_pkgname.fish",
+    "install -Dm644 completions/$_pkgname -t \"$pkgdir/usr/share/bash-completion/completions\"",
+    "install -Dm644 completions/_$_pkgname -t \"$pkgdir/usr/share/zsh/site-functions\"",
+    "install -Dm644 completions/$_pkgname.fish -t \"$pkgdir/usr/share/fish/vendor_completions.d\"",
 ]

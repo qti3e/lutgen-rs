@@ -4,7 +4,8 @@ use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use lutgen::{
     identity::correct_image,
     interpolation::{
-        GaussianRemapper, GaussianSamplingRemapper, InterpolatedRemapper, ShepardRemapper,
+        GaussianRemapper, GaussianSamplingRemapper, InterpolatedRemapper, NearestNeighborRemapper,
+        NearestNeighborRemapper2, ShepardRemapper,
     },
     GenerateLut, Image,
 };
@@ -51,14 +52,60 @@ fn benchmark(c: &mut Criterion) {
     let mut g = c.benchmark_group("remap_gaussian_sampling");
     g.sample_size(100);
     g.bench_function(BenchmarkId::new("pixel", 1), |b| {
+        let remapper = gaussian_sampling();
         b.iter(|| {
-            let mut pixel = [63, 127, 255].into();
-            gaussian_sampling().remap_pixel(&mut pixel);
+            let mut pixel = black_box([63, 127, 255].into());
+            remapper.remap_pixel(&mut pixel);
             black_box(pixel);
         })
     });
-
     drop(g);
+
+    let mut g = c.benchmark_group("remap_nearest_neighbor");
+    g.sample_size(25);
+    for i in (1..=4).map(|i| i * 4) {
+        g.bench_with_input(BenchmarkId::new("hald", i), &i, |b, i| {
+            b.iter(|| hald(*i, nearest_neighbor));
+        });
+    }
+    drop(g);
+
+    let mut g = c.benchmark_group("remap_nearest_neighbor");
+    g.sample_size(100);
+    g.bench_function(BenchmarkId::new("pixel", 1), |b| {
+        let remapper = nearest_neighbor();
+        b.iter(|| {
+            let mut pixel = black_box([63, 127, 255].into());
+            remapper.remap_pixel(&mut pixel);
+            black_box(pixel);
+        })
+    });
+    drop(g);
+
+    // --
+
+    let mut g = c.benchmark_group("remap_nearest_neighbor2");
+    g.sample_size(25);
+    for i in (1..=4).map(|i| i * 4) {
+        g.bench_with_input(BenchmarkId::new("hald", i), &i, |b, i| {
+            b.iter(|| hald(*i, nearest_neighbor2));
+        });
+    }
+    drop(g);
+
+    let mut g = c.benchmark_group("remap_nearest_neighbor2");
+    g.sample_size(100);
+    g.bench_function(BenchmarkId::new("pixel", 1), |b| {
+        let remapper = nearest_neighbor2();
+        b.iter(|| {
+            let mut pixel = black_box([63, 127, 255].into());
+            remapper.remap_pixel(&mut pixel);
+            black_box(pixel);
+        })
+    });
+    drop(g);
+
+    //
 
     let mut g = c.benchmark_group("apply");
     g.sample_size(100);
@@ -95,6 +142,14 @@ fn shepards_method() -> ShepardRemapper {
 
 fn gaussian_sampling() -> GaussianSamplingRemapper<'static> {
     GaussianSamplingRemapper::new(Palette::Carburetor.get(), 0.0, 20.0, 512, 1.0, 42080085)
+}
+
+fn nearest_neighbor() -> NearestNeighborRemapper<'static> {
+    NearestNeighborRemapper::new(Palette::Carburetor.get(), 1.0)
+}
+
+fn nearest_neighbor2() -> NearestNeighborRemapper2<'static> {
+    NearestNeighborRemapper2::new(Palette::Carburetor.get(), 1.0)
 }
 
 fn apply(lut: &Image, mut img: Image) {
