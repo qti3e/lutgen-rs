@@ -141,15 +141,15 @@ fn shepards_method() -> ShepardRemapper {
 }
 
 fn gaussian_sampling() -> GaussianSamplingRemapper<'static> {
-    GaussianSamplingRemapper::new(Palette::Carburetor.get(), 0.0, 20.0, 512, 1.0, 42080085)
+    GaussianSamplingRemapper::new(Palette::Apathy.get(), 0.0, 20.0, 512, 1.0, 42080085)
 }
 
 fn nearest_neighbor() -> NearestNeighborRemapper<'static> {
-    NearestNeighborRemapper::new(Palette::Carburetor.get(), 1.0)
+    NearestNeighborRemapper::new(Palette::Apathy.get(), 1.0)
 }
 
 fn nearest_neighbor2() -> NearestNeighborRemapper2<'static> {
-    NearestNeighborRemapper2::new(Palette::Carburetor.get(), 1.0)
+    NearestNeighborRemapper2::new(Palette::Apathy.get(), 1.0)
 }
 
 fn apply(lut: &Image, mut img: Image) {

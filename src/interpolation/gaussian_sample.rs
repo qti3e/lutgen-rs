@@ -20,7 +20,7 @@ pub struct GaussianSamplingRemapper<'a> {
     iterations: usize,
     seed: u64,
     normal: Normal<f64>,
-    nearest_neighbor: NearestNeighborRemapper2<'a>,
+    nearest_neighbor: NearestNeighborRemapper<'a>,
 }
 
 impl<'a> GaussianSamplingRemapper<'a> {
@@ -34,7 +34,7 @@ impl<'a> GaussianSamplingRemapper<'a> {
         seed: u64,
     ) -> Self {
         let normal = Normal::new(mean, std_dev).unwrap();
-        let nearest_neighbor = NearestNeighborRemapper2::new(palette, lum_factor);
+        let nearest_neighbor = NearestNeighborRemapper::new(palette, lum_factor);
 
         Self {
             iterations,

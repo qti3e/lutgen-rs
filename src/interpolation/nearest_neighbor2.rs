@@ -1,6 +1,6 @@
 use std::simd::{
     cmp::SimdPartialEq, f32x16, f32x4, f32x8, num::SimdFloat, LaneCount, Mask, Simd, SimdElement,
-    SupportedLaneCount,
+    StdFloat, SupportedLaneCount,
 };
 
 use arrayvec::ArrayVec;
@@ -240,25 +240,32 @@ where
     let g = a[1] - b[1];
     let b = a[2] - b[2];
 
-    let l = Simd::<f32, N>::splat(0.4122214708) * r
-        + Simd::<f32, N>::splat(0.5363325363) * g
-        + Simd::<f32, N>::splat(0.0514459929) * b;
-    let m = Simd::<f32, N>::splat(0.2119034982) * r
-        + Simd::<f32, N>::splat(0.6806995451) * g
-        + Simd::<f32, N>::splat(0.1073969566) * b;
-    let s = Simd::<f32, N>::splat(0.0883024619) * r
-        + Simd::<f32, N>::splat(0.2817188376) * g
-        + Simd::<f32, N>::splat(0.6299787005) * b;
+    let l = Simd::<f32, N>::splat(0.4122214708) * r;
+    let l = Simd::<f32, N>::splat(0.5363325363).mul_add(g, l);
+    let l = Simd::<f32, N>::splat(0.0514459929).mul_add(b, l);
 
-    let l_ = (Simd::<f32, N>::splat(0.2104542553) * l + Simd::<f32, N>::splat(0.7936177850) * m
-        - Simd::<f32, N>::splat(0.0040720468) * s)
-        * Simd::<f32, N>::splat(lum_factor);
-    let a_ = Simd::<f32, N>::splat(1.9779984951) * l - Simd::<f32, N>::splat(2.4285922050) * m
-        + Simd::<f32, N>::splat(0.4505937099) * s;
-    let b_ = Simd::<f32, N>::splat(0.0259040371) * l + Simd::<f32, N>::splat(0.7827717662) * m
-        - Simd::<f32, N>::splat(0.8086757660) * s;
+    let m = Simd::<f32, N>::splat(0.2119034982) * r;
+    let m = Simd::<f32, N>::splat(0.6806995451).mul_add(g, m);
+    let m = Simd::<f32, N>::splat(0.1073969566).mul_add(b, m);
 
-    l_ * l_ + a_ * a_ + b_ * b_
+    let s = Simd::<f32, N>::splat(0.0883024619) * r;
+    let s = Simd::<f32, N>::splat(0.2817188376).mul_add(g, s);
+    let s = Simd::<f32, N>::splat(0.6299787005).mul_add(b, s);
+
+    let l_ = Simd::<f32, N>::splat(0.2104542553) * l;
+    let l_ = Simd::<f32, N>::splat(0.7936177850).mul_add(m, l_);
+    let l_ = Simd::<f32, N>::splat(-0.0040720468).mul_add(s, l_);
+    let l_ = Simd::<f32, N>::splat(lum_factor) * l_;
+
+    let a_ = Simd::<f32, N>::splat(1.9779984951) * l;
+    let a_ = Simd::<f32, N>::splat(-2.4285922050).mul_add(m, a_);
+    let a_ = Simd::<f32, N>::splat(0.4505937099).mul_add(s, a_);
+
+    let b_ = Simd::<f32, N>::splat(0.0259040371) * l;
+    let b_ = Simd::<f32, N>::splat(0.7827717662).mul_add(m, b_);
+    let b_ = Simd::<f32, N>::splat(-0.8086757660).mul_add(s, b_);
+
+    l_.mul_add(l_, a_.mul_add(a_, b_ * b_))
 }
 
 /// Find the index of value in a SIMD vec.
@@ -268,7 +275,6 @@ where
     LaneCount<N>: SupportedLaneCount,
     T: SimdElement,
     Simd<T, N>: SimdPartialEq<Mask = Mask<<T as SimdElement>::Mask, N>>,
-    // <Simd<T, N> as SimdPartialEq>::Mask: MaskElement,
 {
     let out = Simd::<T, N>::splat(value).simd_eq(v);
     out.first_set()
