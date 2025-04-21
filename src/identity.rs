@@ -47,6 +47,33 @@ where
     }
 }
 
+fn find_shr(cube_size: u32) {
+    'outer: for s in 0..32 {
+        let mul = ((255.0f64 / (cube_size as f64 - 1.0)) * ((1 << s) as f64)) as u32;
+        let mut n = 0;
+        let mut v = vec![];
+        for x in 0..=255 {
+            let actual = ((x * mul) >> s) as u8;
+            let expected = (x * 255 / (cube_size - 1)) as u8;
+            if actual != expected {
+                n += 1;
+                v.push(x);
+            }
+        }
+        if n < 3 || n == 12 {
+            println!("{cube_size} -> {s} : {n} | {v:?}");
+        } else {
+            println!("{cube_size} -> {s} : {n}");
+        }
+    }
+}
+
+#[test]
+fn xxx() {
+    find_shr(8 * 8);
+    find_shr(12 * 12);
+}
+
 /// Correct a single pixel with a hald clut identity.
 ///
 /// Simple implementation that doesn't do any interpolation,
