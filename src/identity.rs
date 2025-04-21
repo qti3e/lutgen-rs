@@ -8,29 +8,43 @@ pub fn generate(level: u8) -> RgbImage {
     let level = level as u32;
     let cube_size = level * level;
     let image_size = cube_size * level;
-
     let mut buffer = vec![0; (image_size * image_size * 3) as usize];
 
-    let mut i = 0;
-    for blue in 0..cube_size {
-        let b = (blue * 255 / (cube_size - 1)) as u8;
-        for green in 0..cube_size {
-            let g = (green * 255 / (cube_size - 1)) as u8;
-            for red in 0..cube_size {
-                let r = (red * 255 / (cube_size - 1)) as u8;
-
-                buffer[i] = r;
-                i += 1;
-                buffer[i] = g;
-                i += 1;
-                buffer[i] = b;
-                i += 1;
-            }
-        }
+    match level {
+        16 => generate_inner(cube_size, &mut buffer, |v| v as u8),
+        12 => generate_inner(cube_size, &mut buffer, |v| ((v * 1826) >> 10) as u8),
+        8 => generate_inner(cube_size, &mut buffer, |v| ((v * 4145) >> 10) as u8),
+        4 => generate_inner(cube_size, &mut buffer, |v| (v * 17) as u8),
+        n => generate_inner(cube_size, &mut buffer, |v| {
+            (v * 255 / (cube_size - 1)) as u8
+        }),
     }
 
     RgbImage::from_vec(image_size, image_size, buffer)
         .expect("failed to create identity from buffer")
+}
+
+#[inline(always)]
+fn generate_inner<F>(cube_size: u32, buffer: &mut [u8], f: F)
+where
+    F: Fn(u32) -> u8,
+{
+    let mut i = 0;
+    for blue in 0..cube_size {
+        let b = f(blue);
+        for green in 0..cube_size {
+            let g = f(green);
+            for red in 0..cube_size {
+                let r = f(red);
+                *unsafe { buffer.get_unchecked_mut(i) } = r;
+                i += 1;
+                *unsafe { buffer.get_unchecked_mut(i) } = g;
+                i += 1;
+                *unsafe { buffer.get_unchecked_mut(i) } = b;
+                i += 1;
+            }
+        }
+    }
 }
 
 /// Correct a single pixel with a hald clut identity.
